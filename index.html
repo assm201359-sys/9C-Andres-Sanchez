@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Mundo de Lionel Messi</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#010E26;
+    color:#FFFFFF;
+}
+
+header{
+    border-bottom:2px solid #39FF14;
+    padding:20px;
+    text-align:center;
+}
+
+header h1{
+    font-size:40px;
+    color:#39FF14;
+}
+
+main{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    padding:30px;
+    gap:30px;
+}
+
+.imagen{
+    width:300px;
+}
+
+.imagen img{
+    width:100%;
+    border-radius:10px;
+    border:3px solid #39FF14;
+}
+
+.info{
+    max-width:700px;
+}
+
+.info h2{
+    font-size:35px;
+    color:#39FF14;
+    margin-bottom:15px;
+}
+
+.info p{
+    font-size:18px;
+    text-align:justify;
+    line-height:1.6;.
+  
+}
+
+.botones{
+    margin-top:25px;
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+button{
+    padding:12px 20px;
+    border:none;
+    border-radius:10px;
+    background:#39FF14;
+    color:#010E26;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 20px #39FF14;
+}
+
+a{
+    text-decoration:none;
+}
+
+#horario{
+    width:95%;
+    margin:30px auto;
+    display:none;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    border:1px solid white;
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#39FF14;
+    color:#010E26;
+}
+
+.modo-hacker th{
+    background:#87CEFA;
+}
+
+.modo-hacker td{
+    background:#FFD700;
+    color:black;
+}
+
+footer{
+    text-align:center;
+    padding:20px;
+    border-top:2px solid #39FF14;
+    margin-top:40px;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1>Martin Benavides Silva</h1>
+</header>
+
+<main>
+
+<div class="imagen">
+<img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Lionel_Messi_20180626.jpg" alt="Messi">
+</div>
+
+<div class="info">
+
+<h2>Lionel Messi</h2>
+
+<p>
+Lionel Messi es considerado por millones de personas como el mejor futbolista de todos los tiempos.
+Ha ganado 8 Balones de Oro, 4 Champions League y la Copa Mundial de la FIFA con la selección de Argentina.
+Jugó en el FC Barcelona, París Saint-Germain e Inter Miami, dejando una huella imborrable en la historia del fútbol.
+</p>
+
+<div class="botones">
+
+<button id="btnHorario">
+Mostrar Horario
+</button>
+
+<button id="btnColor">
+Cambiar Colores
+</button>
+
+<a href="registro.html">
+<button>
+Ir al Registro
+</button>
+</a>
+
+</div>
+
+</div>
+
+</main>
+
+<div id="horario">
+
+<h2 style="text-align:center;margin-bottom:20px;color:#39FF14;">
+Horario Escolar
+</h2>
+
+<table id="tabla">
+
+<tr>
+<th>Clase</th>
+<th>Día 1</th>
+<th>Día 2</th>
+<th>Día 3</th>
+<th>Día 4</th>
+<th>Día 5</th>
+<th>Día 6</th>
+<th>Día 7</th>
+</tr>
+
+<tr>
+<td>1</td>
+<td>Español</td>
+<td>Sociales</td>
+<td>Estadística</td>
+<td>Filosofía</td>
+<td>Dibujo</td>
+<td>Matemáticas</td>
+<td>Sociales</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>Biología</td>
+<td>Francés</td>
+<td>Español</td>
+<td>Francés</td>
+<td>Dibujo</td>
+<td>Ed. Física</td>
+<td>My English Lab</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>Skills</td>
+<td>Matemáticas</td>
+<td>English</td>
+<td>English</td>
+<td>Sociales</td>
+<td>Biología</td>
+<td>English</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>Francés</td>
+<td>Informática</td>
+<td>PILEO</td>
+<td>Matemáticas</td>
+<td>Matemáticas</td>
+<td>Física</td>
+<td>Biología</td>
+</tr>
+
+<tr>
+<td>5</td>
+<td>English</td>
+<td>Biología</td>
+<td>Sociales</td>
+<td>Informática</td>
+<td>Danzas</td>
+<td>PILEO</td>
+<td>Matemáticas</td>
+</tr>
+
+<tr>
+<td>6</td>
+<td>Matemáticas</td>
+<td>Ed. Física</td>
+<td>Informática</td>
+<td>Ética</td>
+<td>Español</td>
+<td>Sociales</td>
+<td>Química</td>
+</tr>
+
+<tr>
+<td>7</td>
+<td>Cátedra de Paz</td>
+<td>Español</td>
+<td>Danzas</td>
+<td>Biología</td>
+<td>English</td>
+<td>Sociales</td>
+<td>Español</td>
+</tr>
+
+</table>
+
+</div>
+
+<footer>
+
+Proyecto Web - El Mundo de Lionel Messi
+
+</footer>
+
+<script>
+
+const horario=document.getElementById("horario");
+const botonHorario=document.getElementById("btnHorario");
+
+botonHorario.onclick=function(){
+
+if(horario.style.display==="block"){
+    horario.style.display="none";
+    botonHorario.textContent="Mostrar Horario";
+}
+else{
+    horario.style.display="block";
+    botonHorario.textContent="Ocultar Horario";
+}
+
+}
+
+const botonColor=document.getElementById("btnColor");
+const tabla=document.getElementById("tabla");
+
+botonColor.onclick=function(){
+
+tabla.classList.toggle("modo-hacker");
+
+}
+
+</script>
+
+</body>
+</html>
