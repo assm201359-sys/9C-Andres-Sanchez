@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Carrera de Fútbol - Simulador</title>
+    <style>
+        /* ============================================================
+               RESET Y BASE
+               ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #0a0e1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        #app {
+            max-width: 880px;
+            width: 100%;
+            background: #111827;
+            border-radius: 28px;
+            padding: 22px 18px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            border: 1px solid #1f2937;
+        }
+
+        /* ============================================================
+               PESTAÑAS
+               ============================================================ */
+        .panel {
+            display: none;
+            animation: fadeIn 0.35s ease;
+        }
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+               TARJETA DEL JUGADOR (estilo imagen)
+               ============================================================ */
+        .player-card {
+            background: linear-gradient(145deg, #1a2332, #0f172a);
+            border-radius: 24px;
+            padding: 18px 16px 16px;
+            border: 1px solid #2a3a4a;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.4);
+            margin-bottom: 16px;
+        }
+
+        .player-card .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .player-card .ovr-box {
+            background: #1a2a3a;
+            border-radius: 16px;
+            padding: 4px 16px 4px 14px;
+            border: 1px solid #3a4a5a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .player-card .ovr-box .label {
+            color: #8a9aaa;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .player-card .ovr-box .value {
+            color: #fff;
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .player-card .flag-badge {
+            font-size: 32px;
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.1));
+        }
+
+        .player-card .name-num {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+        .player-card .name-num .nombre {
+            color: #fff;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .player-card .name-num .numero {
+            color: #ffb74d;
+            font-size: 20px;
+            font-weight: 800;
+            background: rgba(255, 183, 77, 0.12);
+            padding: 0 12px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 183, 77, 0.15);
+        }
+
+        .player-card .pos-club {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 18px;
+            margin-top: 6px;
+            color: #b0c0d0;
+            font-size: 15px;
+            align-items: center;
+        }
+        .player-card .pos-club .pos {
+            font-weight: 700;
+            color: #4fc3f7;
+            background: rgba(79, 195, 247, 0.08);
+            padding: 2px 12px;
+            border-radius: 30px;
+            border: 1px solid rgba(79, 195, 247, 0.1);
+        }
+        .player-card .pos-club .club {
+            color: #ffb74d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .player-card .pos-club .club img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: white;
+            padding: 2px;
+        }
+        .player-card .pos-club .valor {
+            color: #66bb6a;
+            font-weight: 600;
+        }
+
+        .player-card .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 10px 6px;
+            border: 1px solid #1f2a3a;
+        }
+        .player-card .stats-row .stat {
+            text-align: center;
+        }
+        .player-card .stats-row .stat .num {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .player-card .stats-row .stat .lbl {
+            font-size: 10px;
+            color: #7a8a9a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+        .player-card .stats-row .stat .num.gold {
+            color: #ffb74d;
+        }
+        .player-card .stats-row .stat .num.green {
+            color: #66bb6a;
+        }
+        .player-card .stats-row .stat .num.blue {
+            color: #4fc3f7;
+        }
+        .player-card .stats-row .stat .num.pink {
+            color: #ff8a80;
+        }
+
+        /* ============================================================
+               TROFEOS AGRUPADOS
+               ============================================================ */
+        .trofeos-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 16px;
+            margin: 10px 0 6px;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 16px;
+            border: 1px solid #1f2a3a;
+        }
+        .trofeos-group .categoria {
+            font-size: 13px;
+            color: #8a9aaa;
+            font-weight: 600;
+        }
+        .trofeos-group .items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 8px;
+        }
+        .trofeos-group .items .trofeo {
+            background: rgba(255, 215, 0, 0.08);
+            border: 1px solid rgba(255, 215, 0, 0.12);
+            border-radius: 30px;
+            padding: 2px 12px;
+            font-size: 13px;
+            color: #ffd700;
+        }
+
+        /* ============================================================
+               LÍNEA DE TIEMPO
+               ============================================================ */
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0 8px;
+        }
+        .timeline-header span {
+            color: #8a9aaa;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .timeline {
+            max-height: 340px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .timeline::-webkit-scrollbar {
+            width: 4px;
+        }
+        .timeline::-webkit-scrollbar-track {
+            background: #0f172a;
+            border-radius: 10px;
+        }
+        .timeline::-webkit-scrollbar-thumb {
+            background: #2a3a4a;
+            border-radius: 10px;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 36px 2fr 1.1fr 0.9fr 0.9fr 0.9fr;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            margin-bottom: 3px;
+            background: rgba(255, 255, 255, 0.015);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .timeline-item:hover {
+            background: rgba(79, 195, 247, 0.04);
+        }
+        .timeline-item .edad {
+            color: #8a9aaa;
+            font-weight: 600;
+        }
+        .timeline-item .club {
+            color: #ffb74d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .timeline-item .club img {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: white;
+            padding: 1px;
+        }
+        .timeline-item .ovr {
+            color: #fff;
+            font-weight: 700;
+        }
+        .timeline-item .pj,
+        .timeline-item .gol,
+        .timeline-item .asist {
+            color: #b0c0d0;
+            text-align: center;
+        }
+        .timeline-item .gol {
+            color: #ffb74d;
+        }
+        .timeline-item .asist {
+            color: #66bb6a;
+        }
+        .timeline-item .pj {
+            color: #4fc3f7;
+        }
+        .timeline-item.current {
+            background: rgba(79, 195, 247, 0.06);
+            border-left: 3px solid #4fc3f7;
+        }
+
+        /* ============================================================
+               DECISIONES (en pantalla)
+               ============================================================ */
+        .decision-panel {
+            background: #1a2332;
+            border-radius: 20px;
+            padding: 16px 18px;
+            margin: 12px 0 10px;
+            border: 1px solid #2a3a4a;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .decision-panel .texto {
+            color: #b0c0d0;
+            font-size: 15px;
+            flex: 1;
+        }
+        .decision-panel .texto strong {
+            color: #ffb74d;
+        }
+        .decision-panel .opciones {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .decision-panel .opciones .btn-dec {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.25s;
+            background: #2a3a4a;
+            color: #fff;
+        }
+        .decision-panel .opciones .btn-dec:hover {
+            transform: scale(1.05);
+        }
+        .decision-panel .opciones .btn-dec.aceptar {
+            background: #4fc3f7;
+            color: #0a0e1a;
+        }
+        .decision-panel .opciones .btn-dec.rechazar {
+            background: #ff8a80;
+            color: #0a0e1a;
+        }
+        .decision-panel .opciones .btn-dec.retirarse {
+            background: #d32f2f;
+            color: #fff;
+        }
+
+        /* ============================================================
+               BOTONES GENERALES
+               ============================================================ */
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #4fc3f7, #0288d1);
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 20px rgba(79, 195, 247, 0.15);
+        }
+        .btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 30px rgba(79, 195, 247, 0.25);
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .btn-block {
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #ff8a80, #d32f2f);
+            box-shadow: 0 4px 20px rgba(255, 138, 128, 0.15);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #66bb6a, #2e7d32);
+            box-shadow: 0 4px 20px rgba(102, 187, 106, 0.15);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #ffb74d, #f57c00);
+            box-shadow: 0 4px 20px rgba(255, 183, 77, 0.15);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #4fc3f7;
+            color: #4fc3f7;
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            background: rgba(79, 195, 247, 0.08);
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 10px 0 6px;
+        }
+
+        /* ============================================================
+               FORMULARIOS INICIALES
+               ============================================================ */
+        .label-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin: 14px 0 8px;
+        }
+        .label-group label {
+            color: #b0c0d0;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+        .label-group input,
+        .label-group select {
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 2px solid #2a3a4a;
+            background: #0f172a;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+            width: 100%;
+        }
+        .label-group input:focus,
+        .label-group select:focus {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.05);
+        }
+
+        .selector-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .selector-grid .opt {
+            background: #1a2332;
+            border: 2px solid #2a3a4a;
+            border-radius: 14px;
+            padding: 10px 4px;
+            text-align: center;
+            color: #c0d0e0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.25s;
+            font-size: 14px;
+        }
+        .selector-grid .opt:hover {
+            border-color: #4fc3f7;
+            background: #1f2a3a;
+        }
+        .selector-grid .opt.selected {
+            border-color: #4fc3f7;
+            background: rgba(79, 195, 247, 0.12);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.05);
+        }
+        .selector-grid .opt .flag {
+            font-size: 26px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .selector-grid .opt .badge {
+            font-size: 22px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* ============================================================
+               OFERTAS DE CLUBES
+               ============================================================ */
+        .ofertas {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .oferta {
+            background: #1a2332;
+            border-radius: 18px;
+            padding: 14px 18px;
+            border: 1px solid #2a3a4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.25s;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .oferta:hover {
+            border-color: #4fc3f7;
+            background: #1f2a3a;
+            transform: scale(1.01);
+        }
+        .oferta .info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .oferta .info img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: white;
+            padding: 3px;
+        }
+        .oferta .info .nombre {
+            color: #fff;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .oferta .info .liga {
+            color: #8a9aaa;
+            font-size: 14px;
+        }
+        .oferta .btn-fichar {
+            background: #4fc3f7;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 24px;
+            color: #0a0e1a;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+        .oferta .btn-fichar:hover {
+            background: #81d4fa;
+            transform: scale(1.05);
+        }
+
+        /* ============================================================
+               RESPONSIVE
+               ============================================================ */
+        @media (max-width: 700px) {
+            #app {
+                padding: 14px 10px;
+            }
+            .player-card .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .timeline-item {
+                grid-template-columns: 30px 1.5fr 0.9fr 0.7fr 0.7fr 0.7fr;
+                font-size: 12px;
+                padding: 5px 8px;
+            }
+            .timeline-item .club {
+                font-size: 12px;
+            }
+            .decision-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .decision-panel .opciones {
+                justify-content: center;
+            }
+            .selector-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+            .player-card .name-num .nombre {
+                font-size: 22px;
+            }
+            .oferta .info img {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        @media (max-width: 450px) {
+            .timeline-item {
+                grid-template-columns: 26px 1.2fr 0.8fr 0.6fr 0.6fr 0.6fr;
+                font-size: 11px;
+                padding: 4px 6px;
+            }
+            .player-card .ovr-box .value {
+                font-size: 22px;
+            }
+            .player-card .pos-club {
+                font-size: 13px;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+
+        <!-- ========================================================== -->
+        <!-- PANEL 1: IDENTIDAD -->
+        <!-- ========================================================== -->
+        <div class="panel active" id="panelIdentidad">
+            <h2 style="color:#fff; font-size:22px; margin-bottom:4px;">⚽ Defini tu identidad</h2>
+            <p style="color:#7a8a9a; font-size:14px; margin-bottom:12px;">Completá tus datos para comenzar</p>
+
+            <div class="label-group">
+                <label>APELLIDO</label>
+                <input type="text" id="inputApellido" placeholder="Ej: Messi" maxlength="20" value="Messi">
+            </div>
+
+            <div class="label-group">
+                <label>NÚMERO</label>
+                <input type="number" id="inputNumero" placeholder="1-99" min="1" max="99" value="10">
+            </div>
+
+            <div class="label-group">
+                <label>PIERNA HÁBIL</label>
+                <div class="btn-group" id="piernaGroup">
+                    <button class="btn btn-outline selected" data-pierna="Izquierda">Izquierda</button>
+                    <button class="btn btn-outline" data-pierna="Derecha">Derecha</button>
+                </div>
+            </div>
+
+            <div class="label-group">
+                <label>NACIONALIDAD</label>
+                <div class="selector-grid" id="nacionalidadGrid"></div>
+            </div>
+
+            <div class="label-group">
+                <label>POSICIÓN</label>
+                <div class="selector-grid" id="posicionGrid"></div>
+            </div>
+
+            <button class="btn btn-block" id="btnIdentidadSiguiente">Siguiente →</button>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- PANEL 2: OFERTAS DE CLUBES -->
+        <!-- ========================================================== -->
+        <div class="panel" id="panelOfertas">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+                <div>
+                    <span style="color:#fff; font-size:20px; font-weight:700;">Oferta de cantera</span>
+                    <p style="color:#7a8a9a; font-size:14px;">Tres clubes quieren sumarte a su proyecto juvenil.</p>
+                </div>
+                <span style="color:#4fc3f7; font-weight:600; font-size:14px; background:#1a2a3a; padding:4px 14px; border-radius:30px; border:1px solid #2a3a4a;">
+                    #<span id="preNumero">10</span>
+                </span>
+            </div>
+
+            <div id="ofertasContainer" class="ofertas"></div>
+
+            <button class="btn btn-block btn-secondary" id="btnOfertasAtras" style="margin-top:8px;">← Atrás</button>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- PANEL 3: CARRERA (SIMULACIÓN) -->
+        <!-- ========================================================== -->
+        <div class="panel" id="panelCarrera">
+            <!-- Tarjeta del jugador -->
+            <div class="player-card" id="playerCard">
+                <div class="top-row">
+                    <div class="ovr-box">
+                        <span class="label">OVR</span>
+                        <span class="value" id="cardOvr">50</span>
+                    </div>
+                    <div class="flag-badge" id="cardFlag">🇦🇷</div>
+                </div>
+
+                <div class="name-num">
+                    <span class="nombre" id="cardNombre">Messi</span>
+                    <span class="numero" id="cardNumero">#10</span>
+                </div>
+
+                <div class="pos-club">
+                    <span class="pos" id="cardPos">DC</span>
+                    <span class="club" id="cardClub">Huracán</span>
+                    <span class="valor" id="cardValor">€100K</span>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat"><div class="num gold" id="cardGoles">0</div><div class="lbl">Goles</div></div>
+                    <div class="stat"><div class="num green" id="cardAsistencias">0</div><div class="lbl">Asistencias</div></div>
+                    <div class="stat"><div class="num blue" id="cardPartidos">0</div><div class="lbl">Partidos</div></div>
+                    <div class="stat"><div class="num pink" id="cardTrofeos">0</div><div class="lbl">Trofeos</div></div>
+                </div>
+
+                <!-- Trofeos agrupados -->
+                <div class="trofeos-group" id="trofeosGroup">
+                    <div class="categoria">🏆 Trofeos:</div>
+                    <div class="items" id="trofeosItems">
+                        <span style="color:#4a5a6a; font-size:13px;">Sin trofeos aún</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Decisiones (en pantalla) -->
+            <div class="decision-panel" id="decisionPanel">
+                <div class="texto" id="decisionTexto">
+                    <strong>📌 Decisión:</strong> ¿Quieres irte cedido o quedarte?
+                </div>
+                <div class="opciones" id="decisionOpciones">
+                    <button class="btn-dec aceptar" data-decision="cedido">🔄 Ir cedido</button>
+                    <button class="btn-dec rechazar" data-decision="quedarse">🏠 Quedarse</button>
+                </div>
+            </div>
+
+            <!-- Línea de tiempo -->
+            <div class="timeline-header">
+                <span>📅 EVOLUCIÓN</span>
+                <span id="carreraEdad" style="color:#4a5a6a;">17 años</span>
+            </div>
+            <div class="timeline" id="timelineContainer">
+                <div class="empty-state" style="color:#4a5a6a; text-align:center; padding:20px 0;">⚽ Tu carrera comenzará aquí...</div>
+            </div>
+
+            <!-- Botones -->
+            <div class="btn-group">
+                <button class="btn btn-success" id="btnSimularAño">▶ Simular año</button>
+                <button class="btn btn-secondary" id="btnReiniciarCarrera">🔄 Reiniciar</button>
+            </div>
+            <div style="margin-top:4px; text-align:center;">
+                <span style="color:#4a5a6a; font-size:13px;" id="mensajeSimulacion">Presioná "Simular año" para avanzar</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ================================================================
+        //  DATOS
+        // ================================================================
+
+        // Nacionalidades con banderas
+        const NACIONALIDADES = [
+            { nombre: 'Argentina', flag: '🇦🇷' },
+            { nombre: 'Alemania', flag: '🇩🇪' },
+            { nombre: 'Angola', flag: '🇦🇴' },
+            { nombre: 'Antigua y Barb.', flag: '🇦🇬' },
+            { nombre: 'Armenia', flag: '🇦🇲' },
+            { nombre: 'Australia', flag: '🇦🇺' },
+            { nombre: 'Austria', flag: '🇦🇹' },
+            { nombre: 'Brasil', flag: '🇧🇷' },
+            { nombre: 'Colombia', flag: '🇨🇴' },
+            { nombre: 'Ecuador', flag: '🇪🇨' },
+            { nombre: 'España', flag: '🇪🇸' },
+            { nombre: 'Francia', flag: '🇫🇷' },
+            { nombre: 'Inglaterra', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+            { nombre: 'Italia', flag: '🇮🇹' },
+            { nombre: 'Portugal', flag: '🇵🇹' },
+            { nombre: 'Uruguay', flag: '🇺🇾' },
+        ];
+
+        // Posiciones
+        const POSICIONES = [
+            { id: 'DC', label: 'DC' }, { id: 'EI', label: 'EI' }, { id: 'ED', label: 'ED' },
+            { id: 'MCO', label: 'MCO' }, { id: 'MI', label: 'MI' }, { id: 'MD', label: 'MD' },
+            { id: 'MC', label: 'MC' }, { id: 'MCD', label: 'MCD' },
+            { id: 'LI', label: 'LI' }, { id: 'LD', label: 'LD' },
+            { id: 'DFC', label: 'DFC' }, { id: 'POR', label: 'POR' }
+        ];
+
+        // Clubes con escudos (URLs reales de imágenes)
+        const CLUBES_DB = [
+            { nombre: 'Dep. Maipú', liga: 'Primera Nacional', escudo: 'https://cdn.futbol11.com/escudos/dep-maipu.png' },
+            { nombre: 'Midland', liga: 'Primera Nacional', escudo: 'https://cdn.futbol11.com/escudos/midland.png' },
+            { nombre: 'Huracán', liga: 'Liga Profesional', escudo: 'https://cdn.futbol11.com/escudos/huracan.png' },
+            { nombre: 'San Martín (SJ)', liga: 'Liga Profesional', escudo: 'https://cdn.futbol11.com/escudos/san-martin-sj.png' },
+            { nombre: 'Nacional Potosí', liga: 'Liga Boliviana', escudo: 'https://cdn.futbol11.com/escudos/nacional-potosi.png' },
+            { nombre: 'Chapecoense', liga: 'Serie B', escudo: 'https://cdn.futbol11.com/escudos/chapecoense.png' },
+            { nombre: 'Grêmio', liga: 'Serie A', escudo: 'https://cdn.futbol11.com/escudos/gremio.png' },
+            { nombre: 'IDV', liga: 'Liga Ecuatoriana', escudo: 'https://cdn.futbol11.com/escudos/idv.png' },
+            { nombre: 'RB Bragantino', liga: 'Serie A', escudo: 'https://cdn.futbol11.com/escudos/rb-bragantino.png' },
+            { nombre: 'River Plate', liga: 'Liga Profesional', escudo: 'https://cdn.futbol11.com/escudos/river-plate.png' },
+            { nombre: 'Boca Juniors', liga: 'Liga Profesional', escudo: 'https://cdn.futbol11.com/escudos/boca-juniors.png' },
+            { nombre: 'Barcelona SC', liga: 'Liga Ecuatoriana', escudo: 'https://cdn.futbol11.com/escudos/barcelona-sc.png' },
+            { nombre: 'Real Madrid', liga: 'La Liga', escudo: 'https://cdn.futbol11.com/escudos/real-madrid.png' },
+            { nombre: 'Barcelona', liga: 'La Liga', escudo: 'https://cdn.futbol11.com/escudos/barcelona.png' },
+            { nombre: 'Bayern Múnich', liga: 'Bundesliga', escudo: 'https://cdn.futbol11.com/escudos/bayern-munich.png' },
+            { nombre: 'PSG', liga: 'Ligue 1', escudo: 'https://cdn.futbol11.com/escudos/psg.png' },
+            { nombre: 'Manchester City', liga: 'Premier League', escudo: 'https://cdn.futbol11.com/escudos/manchester-city.png' },
+            { nombre: 'Liverpool', liga: 'Premier League', escudo: 'https://cdn.futbol11.com/escudos/liverpool.png' },
+            { nombre: 'Chelsea', liga: 'Premier League', escudo: 'https://cdn.futbol11.com/escudos/chelsea.png' },
+            { nombre: 'Benfica', liga: 'Primeira Liga', escudo: 'https://cdn.futbol11.com/escudos/benfica.png' },
+            { nombre: 'Porto', liga: 'Primeira Liga', escudo: 'https://cdn.futbol11.com/escudos/porto.png' },
+            { nombre: 'Sporting CP', liga: 'Primeira Liga', escudo: 'https://cdn.futbol11.com/escudos/sporting-cp.png' },
+        ];
+
+        // ================================================================
+        //  ESTADO DEL JUGADOR / CARRERA
+        // ================================================================
+        let estado = {
+            apellido: 'Messi',
+            numero: 10,
+            pierna: 'Izquierda',
+            nacionalidad: null,
+            posicion: null,
+
+            // Carrera
+            edad: 16,
+            ovr: 50,
+            goles: 0,
+            asistencias: 0,
+            partidos: 0,
+            trofeos: [], // array de strings
+            clubActual: null,
+            historial: [], // {edad, club, ovr, goles, asistencias, partidos, trofeos}
+            añoActual: 0,
+            carreraActiva: false,
+            paisActual: null, // para cambios de país
+        };
+
+        let ofertas = [];
+
+        // ================================================================
+        //  DOM REFS
+        // ================================================================
+        const panelIdentidad = document.getElementById('panelIdentidad');
+        const panelOfertas = document.getElementById('panelOfertas');
+        const panelCarrera = document.getElementById('panelCarrera');
+
+        const inputApellido = document.getElementById('inputApellido');
+        const inputNumero = document.getElementById('inputNumero');
+        const piernaGroup = document.getElementById('piernaGroup');
+        const nacionalidadGrid = document.getElementById('nacionalidadGrid');
+        const posicionGrid = document.getElementById('posicionGrid');
+
+        const ofertasContainer = document.getElementById('ofertasContainer');
+        const preNumero = document.getElementById('preNumero');
+
+        const cardNombre = document.getElementById('cardNombre');
+        const cardNumero = document.getElementById('cardNumero');
+        const cardOvr = document.getElementById('cardOvr');
+        const cardFlag = document.getElementById('cardFlag');
+        const cardPos = document.getElementById('cardPos');
+        const cardClub = document.getElementById('cardClub');
+        const cardValor = document.getElementById('cardValor');
+        const cardGoles = document.getElementById('cardGoles');
+        const cardAsistencias = document.getElementById('cardAsistencias');
+        const cardPartidos = document.getElementById('cardPartidos');
+        const cardTrofeos = document.getElementById('cardTrofeos');
+        const trofeosItems = document.getElementById('trofeosItems');
+
+        const timelineContainer = document.getElementById('timelineContainer');
+        const carreraEdad = document.getElementById('carreraEdad');
+        const mensajeSimulacion = document.getElementById('mensajeSimulacion');
+
+        const decisionTexto = document.getElementById('decisionTexto');
+        const decisionOpciones = document.getElementById('decisionOpciones');
+
+        // ================================================================
+        //  RENDER: NACIONALIDADES
+        // ================================================================
+        function renderNacionalidades() {
+            nacionalidadGrid.innerHTML = '';
+            NACIONALIDADES.forEach(n => {
+                const div = document.createElement('div');
+                div.className = 'opt';
+                div.innerHTML = `<span class="flag">${n.flag}</span> ${n.nombre}`;
+                div.dataset.nombre = n.nombre;
+                div.dataset.flag = n.flag;
+                div.addEventListener('click', () => {
+                    document.querySelectorAll('#nacionalidadGrid .opt').forEach(el => el.classList.remove(
+                    'selected'));
+                    div.classList.add('selected');
+                    estado.nacionalidad = { nombre: n.nombre, flag: n.flag };
+                });
+                nacionalidadGrid.appendChild(div);
+            });
+            // Seleccionar Argentina por defecto
+            const primera = nacionalidadGrid.querySelector('.opt');
+            if (primera) {
+                primera.classList.add('selected');
+                estado.nacionalidad = { nombre: 'Argentina', flag: '🇦🇷' };
+            }
+        }
+        renderNacionalidades();
+
+        // ================================================================
+        //  RENDER: POSICIONES
+        // ================================================================
+        function renderPosiciones() {
+            posicionGrid.innerHTML = '';
+            POSICIONES.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'opt';
+                div.textContent = p.label;
+                div.dataset.id = p.id;
+                div.addEventListener('click', () => {
+                    document.querySelectorAll('#posicionGrid .opt').forEach(el => el.classList.remove(
+                    'selected'));
+                    div.classList.add('selected');
+                    estado.posicion = p.id;
+                });
+                posicionGrid.appendChild(div);
+            });
+            const dc = posicionGrid.querySelector('[data-id="DC"]');
+            if (dc) {
+                dc.classList.add('selected');
+                estado.posicion = 'DC';
+            }
+        }
+        renderPosiciones();
+
+        // ================================================================
+        //  PIERNA HÁBIL
+        // ================================================================
+        piernaGroup.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            piernaGroup.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            estado.pierna = btn.dataset.pierna;
+        });
+
+        // ================================================================
+        //  PANEL IDENTIDAD → SIGUIENTE
+        // ================================================================
+        document.getElementById('btnIdentidadSiguiente').addEventListener('click', () => {
+            const apellido = inputApellido.value.trim() || 'Messi';
+            const numero = parseInt(inputNumero.value) || 10;
+            estado.apellido = apellido;
+            estado.numero = numero;
+            if (!estado.nacionalidad) {
+                alert('Seleccioná una nacionalidad.');
+                return;
+            }
+            if (!estado.posicion) {
+                alert('Seleccioná una posición.');
+                return;
+            }
+
+            // Generar ofertas (3 clubes aleatorios)
+            const shuffled = [...CLUBES_DB].sort(() => Math.random() - 0.5);
+            ofertas = shuffled.slice(0, 3);
+
+            renderOfertas();
+            preNumero.textContent = estado.numero;
+            panelIdentidad.classList.remove('active');
+            panelOfertas.classList.add('active');
+        });
+
+        // ================================================================
+        //  RENDER OFERTAS
+        // ================================================================
+        function renderOfertas() {
+            ofertasContainer.innerHTML = '';
+            ofertas.forEach((club, idx) => {
+                const div = document.createElement('div');
+                div.className = 'oferta';
+                div.innerHTML = `
+                    <div class="info">
+                        <img src="${club.escudo}" alt="${club.nombre}" onerror="this.style.display='none'">
+                        <div>
+                            <div class="nombre">${club.nombre}</div>
+                            <div class="liga">${club.liga}</div>
+                        </div>
+                    </div>
+                    <button class="btn-fichar" data-idx="${idx}">Fichar por</button>
+                `;
+                div.querySelector('.btn-fichar').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    ficharClub(idx);
+                });
+                ofertasContainer.appendChild(div);
+            });
+        }
+
+        // ================================================================
+        //  FICHAR CLUB → INICIAR CARRERA
+        // ================================================================
+        function ficharClub(idx) {
+            const club = ofertas[idx];
+            estado.clubActual = { ...club };
+            estado.carreraActiva = true;
+            estado.edad = 16;
+            estado.ovr = 45 + Math.floor(Math.random() * 20);
+            estado.goles = 0;
+            estado.asistencias = 0;
+            estado.partidos = 0;
+            estado.trofeos = [];
+            estado.historial = [];
+            estado.añoActual = 0;
+            estado.paisActual = estado.nacionalidad.nombre;
+
+            agregarHistorial();
+
+            panelOfertas.classList.remove('active');
+            panelCarrera.classList.add('active');
+            actualizarCard();
+            renderTimeline();
+            actualizarTrofeos();
+            generarDecision();
+            mensajeSimulacion.textContent = '✅ Carrera iniciada en ' + club.nombre;
+            mensajeSimulacion.style.color = '#66bb6a';
+        }
+
+        // ================================================================
+        //  AGREGAR AL HISTORIAL
+        // ================================================================
+        function agregarHistorial() {
+            estado.historial.push({
+                edad: estado.edad,
+                club: { ...estado.clubActual },
+                ovr: estado.ovr,
+                goles: estado.goles,
+                asistencias: estado.asistencias,
+                partidos: estado.partidos,
+                trofeos: [...estado.trofeos],
+            });
+            estado.añoActual++;
+        }
+
+        // ================================================================
+        //  ACTUALIZAR TARJETA
+        // ================================================================
+        function actualizarCard() {
+            cardNombre.textContent = estado.apellido;
+            cardNumero.textContent = '#' + estado.numero;
+            cardOvr.textContent = estado.ovr;
+            cardFlag.textContent = estado.nacionalidad.flag;
+            cardPos.textContent = estado.posicion;
+            if (estado.clubActual) {
+                cardClub.innerHTML =
+                    `<img src="${estado.clubActual.escudo}" onerror="this.style.display='none'" style="width:24px;height:24px;border-radius:50%;object-fit:contain;background:white;padding:2px;"> ${estado.clubActual.nombre}`;
+            } else {
+                cardClub.textContent = '—';
+            }
+            // Valor de mercado
+            const valorBase = 50000 + estado.ovr * 2500 + estado.goles * 2000 + estado.asistencias * 1500;
+            const valorStr = valorBase > 1000000 ? '€' + (valorBase / 1000000).toFixed(1) + 'M' :
+                '€' + Math.round(valorBase / 1000) + 'K';
+            cardValor.textContent = valorStr;
+
+            cardGoles.textContent = estado.goles;
+            cardAsistencias.textContent = estado.asistencias;
+            cardPartidos.textContent = estado.partidos;
+            cardTrofeos.textContent = estado.trofeos.length;
+
+            carreraEdad.textContent = estado.edad + ' años';
+        }
+
+        // ================================================================
+        //  ACTUALIZAR TROFEOS AGRUPADOS
+        // ================================================================
+        function actualizarTrofeos() {
+            const grupos = {
+                '🏆 Ligas': [],
+                '🏆 Copas': [],
+                '🌟 Internacionales': [],
+                '🥇 Individuales': [],
+            };
+            estado.trofeos.forEach(t => {
+                if (t.includes('Liga')) grupos['🏆 Ligas'].push(t);
+                else if (t.includes('Copa') || t.includes('Nacional')) grupos['🏆 Copas'].push(t);
+                else if (t.includes('Champions') || t.includes('Mundial') || t.includes('Sudamericana')) grupos[
+                    '🌟 Internacionales'].push(t);
+                else if (t.includes('Balón') || t.includes('Bota')) grupos['🥇 Individuales'].push(t);
+                else grupos['🏆 Ligas'].push(t); // fallback
+            });
+
+            let html = '';
+            let total = 0;
+            for (const [cat, items] of Object.entries(grupos)) {
+                if (items.length > 0) {
+                    total += items.length;
+                    html += `<span class="categoria">${cat}:</span>`;
+                    html += items.map(t => `<span class="trofeo">${t}</span>`).join(' ');
+                }
+            }
+            if (total === 0) {
+                html = '<span style="color:#4a5a6a; font-size:13px;">Sin trofeos aún</span>';
+            }
+            trofeosItems.innerHTML = html;
+        }
+
+        // ================================================================
+        //  RENDER LÍNEA DE TIEMPO
+        // ================================================================
+        function renderTimeline() {
+            timelineContainer.innerHTML = '';
+            if (estado.historial.length === 0) {
+                timelineContainer.innerHTML =
+                    '<div style="color:#4a5a6a; text-align:center; padding:20px 0;">⚽ Tu carrera comenzará aquí...</div>';
+                return;
+            }
+            const items = [...estado.historial].reverse();
+            items.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'timeline-item';
+                if (idx === 0) div.classList.add('current');
+                div.innerHTML = `
+                    <span class="edad">${item.edad}</span>
+                    <span class="club">
+                        <img src="${item.club.escudo}" onerror="this.style.display='none'" style="width:20px;height:20px;border-radius:50%;object-fit:contain;background:white;padding:1px;">
+                        ${item.club.nombre}
+                    </span>
+                    <span class="ovr">${item.ovr}</span>
+                    <span class="pj">${item.partidos}</span>
+                    <span class="gol">${item.goles}</span>
+                    <span class="asist">${item.asistencias}</span>
+                `;
+                timelineContainer.appendChild(div);
+            });
+        }
+
+        // ================================================================
+        //  GENERAR DECISIÓN (aparece en pantalla)
+        // ================================================================
+        function generarDecision() {
+            const edad = estado.edad;
+            let opciones = [];
+            let texto = '';
+
+            if (edad < 23) {
+                texto = '📌 <strong>Decisión:</strong> ¿Quieres irte cedido o quedarte a pelear el puesto?';
+                opciones = [
+                    { id: 'cedido', label: '🔄 Ir cedido', clase: 'aceptar' },
+                    { id: 'quedarse', label: '🏠 Quedarse', clase: 'rechazar' },
+                ];
+            } else if (edad < 30) {
+                texto = '📌 <strong>Decisión:</strong> ¿Quieres ser leyenda en este club o buscar nuevos retos en otro país?';
+                opciones = [
+                    { id: 'leyenda', label: '🏠 Ser leyenda', clase: 'aceptar' },
+                    { id: 'nuevo_pais', label: '🌍 Buscar nuevos retos', clase: 'rechazar' },
+                ];
+            } else if (edad < 35) {
+                texto = '📌 <strong>Decisión:</strong> ¿Aceptas una oferta de un club grande o te retiras?';
+                opciones = [
+                    { id: 'club_grande', label: '⭐ Club grande', clase: 'aceptar' },
+                    { id: 'retirarse', label: '🏁 Retirarse', clase: 'retirarse' },
+                ];
+            } else {
+                texto = '📌 <strong>Decisión:</strong> ¿Quieres jugar una última temporada o retirarte?';
+                opciones = [
+                    { id: 'ultima_temp', label: '⚽ Última temporada', clase: 'aceptar' },
+                    { id: 'retirarse', label: '🏁 Retirarse', clase: 'retirarse' },
+                ];
+            }
+
+            decisionTexto.innerHTML = texto;
+            decisionOpciones.innerHTML = '';
+            opciones.forEach(op => {
+                const btn = document.createElement('button');
+                btn.className = `btn-dec ${op.clase}`;
+                btn.textContent = op.label;
+                btn.dataset.decision = op.id;
+                btn.addEventListener('click', () => tomarDecision(op.id));
+                decisionOpciones.appendChild(btn);
+            });
+        }
+
+        // ================================================================
+        //  TOMAR DECISIÓN (afecta la carrera)
+        // ================================================================
+        function tomarDecision(decision) {
+            let mensaje = '';
+            switch (decision) {
+                case 'cedido':
+                    // Buscar un club de otra liga
+                    const clubesCedido = CLUBES_DB.filter(c => c.nombre !== estado.clubActual.nombre);
+                    if (clubesCedido.length > 0) {
+                        const nuevo = clubesCedido[Math.floor(Math.random() * clubesCedido.length)];
+                        estado.clubActual = { ...nuevo };
+                        mensaje = `🔄 Te vas cedido a ${nuevo.nombre} (${nuevo.liga}).`;
+                    } else {
+                        mensaje = '🔄 No hay clubes disponibles, te quedas.';
+                    }
+                    break;
+
+                case 'quedarse':
+                    mensaje = `🏠 Decides quedarte en ${estado.clubActual.nombre}.`;
+                    break;
+
+                case 'leyenda':
+                    mensaje = `🏠 Te conviertes en leyenda de ${estado.clubActual.nombre}.`;
+                    // Bonus de OVR
+                    estado.ovr = Math.min(99, estado.ovr + 3);
+                    break;
+
+                case 'nuevo_pais':
+                    // Cambiar a un país y club aleatorio
+                    const paises = ['Brasil', 'España', 'Inglaterra', 'Italia', 'Portugal', 'Alemania', 'Francia'];
+                    const nuevoPais = paises[Math.floor(Math.random() * paises.length)];
+                    estado.paisActual = nuevoPais;
+                    const clubesPais = CLUBES_DB.filter(c => {
+                        const liga = c.liga.toLowerCase();
+                        return liga.includes('serie') || liga.includes('premier') || liga.includes('liga') ||
+                            liga.includes('bundes') || liga.includes('primeira');
+                    });
+                    if (clubesPais.length > 0) {
+                        const nuevoClub = clubesPais[Math.floor(Math.random() * clubesPais.length)];
+                        estado.clubActual = { ...nuevoClub };
+                        mensaje = `🌍 Te mudas a ${nuevoPais} para jugar en ${nuevoClub.nombre}.`;
+                    } else {
+                        mensaje = '🌍 No se encontró club, te quedas.';
+                    }
+                    break;
+
+                case 'club_grande':
+                    const grandes = CLUBES_DB.filter(c => c.liga.includes('La Liga') || c.liga.includes('Premier') || c.liga
+                        .includes('Bundes') || c.liga.includes('Serie A'));
+                    if (grandes.length > 0) {
+                        const grande = grandes[Math.floor(Math.random() * grandes.length)];
+                        estado.clubActual = { ...grande };
+                        mensaje = `⭐ Fichas por ${grande.nombre} (${grande.liga}).`;
+                    } else {
+                        mensaje = '⭐ No hay clubes grandes disponibles.';
+                    }
+                    break;
+
+                case 'retirarse':
+                    terminarCarrera();
+                    return;
+
+                case 'ultima_temp':
+                    mensaje = `⚽ Juegas tu última temporada en ${estado.clubActual.nombre}.`;
+                    break;
+
+                default:
+                    mensaje = '🤔 Decisión no reconocida.';
+            }
+
+            // Simular el año después de la decisión
+            simularAño(mensaje);
+        }
+
+        // ================================================================
+        //  SIMULAR AÑO (con suerte)
+        // ================================================================
+        function simularAño(mensajeDecision) {
+            if (!estado.carreraActiva) return;
+
+            // ===== SORTEO DE RENDIMIENTO (SUERTE) =====
+            const suerte = Math.random(); // 0-1
+            const cambio = Math.floor((suerte * 12) - 4); // -4 a +8
+            let nuevoOvr = estado.ovr + cambio;
+            if (nuevoOvr < 40) nuevoOvr = 40;
+            if (nuevoOvr > 99) nuevoOvr = 99;
+            estado.ovr = nuevoOvr;
+
+            // Partidos
+            const pj = Math.floor(15 + (estado.ovr / 100) * 30 + suerte * 10);
+            estado.partidos += pj;
+
+            // Goles y asistencias según posición
+            let g = 0,
+                a = 0;
+            if (estado.posicion === 'DC' || estado.posicion === 'EI' || estado.posicion === 'ED') {
+                g = Math.floor(4 + (estado.ovr / 100) * 14 + suerte * 6);
+                a = Math.floor(2 + (estado.ovr / 100) * 8 + suerte * 4);
+            } else if (estado.posicion === 'MCO' || estado.posicion === 'MI' || estado.posicion === 'MD' || estado
+                .posicion === 'MC') {
+                g = Math.floor(2 + (estado.ovr / 100) * 8 + suerte * 4);
+                a = Math.floor(4 + (estado.ovr / 100) * 12 + suerte * 6);
+            } else if (estado.posicion === 'MCD' || estado.posicion === 'LI' || estado.posicion === 'LD' || estado
+                .posicion === 'DFC') {
+                g = Math.floor(0 + (estado.ovr / 100) * 4 + suerte * 2);
+                a = Math.floor(1 + (estado.ovr / 100) * 5 + suerte * 3);
+            } else { // POR
+                g = 0;
+                a = Math.floor(0 + (estado.ovr / 100) * 2 + suerte * 1);
+            }
+            estado.goles += g;
+            estado.asistencias += a;
+
+            // ===== TROFEOS (SUERTE) =====
+            const nuevosTrofeos = [];
+            if (Math.random() < 0.20 + (estado.ovr / 250)) nuevosTrofeos.push('🏆 Liga');
+            if (Math.random() < 0.15 + (estado.ovr / 300)) nuevosTrofeos.push('🏆 Copa Nacional');
+            if (Math.random() < 0.10 + (estado.ovr / 350)) nuevosTrofeos.push('🌟 Champions League');
+            if (Math.random() < 0.08 + (estado.ovr / 400)) nuevosTrofeos.push('🌍 Mundial de Clubes');
+            if (estado.ovr > 80 && Math.random() < 0.12) nuevosTrofeos.push('🥇 Balón de Oro');
+            if (estado.posicion === 'DC' && estado.goles > 20 && Math.random() < 0.15) nuevosTrofeos.push('🥾 Bota de Oro');
+            if (estado.ovr > 85 && Math.random() < 0.10) nuevosTrofeos.push('🌟 Mejor Jugador del Año');
+
+            if (nuevosTrofeos.length > 0) {
+                estado.trofeos.push(...nuevosTrofeos);
+            }
+
+            // ===== CAMBIO DE CLUB (SUERTE) =====
+            if (estado.edad > 18 && Math.random() < 0.15 + (estado.ovr / 300)) {
+                const disponibles = CLUBES_DB.filter(c => c.nombre !== estado.clubActual.nombre);
+                if (disponibles.length > 0) {
+                    const nuevoClub = disponibles[Math.floor(Math.random() * disponibles.length)];
+                    estado.clubActual = { ...nuevoClub };
+                    mensajeDecision += ` 🔄 Cambias a ${nuevoClub.nombre}.`;
+                }
+            }
+
+            // ===== AVANZAR EDAD =====
+            estado.edad++;
+
+            // Agregar al historial
+            agregarHistorial();
+
+            // Actualizar UI
+            actualizarCard();
+            renderTimeline();
+            actualizarTrofeos();
+
+            // Mensaje
+            const cambioStr = cambio >= 0 ? '+' + cambio : cambio;
+            mensajeSimulacion.textContent =
+                `📅 Año ${estado.añoActual} · ${estado.edad-1} → ${estado.edad} años · OVR ${cambioStr} (${estado.ovr}) · ${g} goles, ${a} asistencias, ${pj} partidos. ${mensajeDecision}`;
+            mensajeSimulacion.style.color = '#b0c0d0';
+
+            if (nuevosTrofeos.length > 0) {
+                mensajeSimulacion.textContent += ' 🏆 ' + nuevosTrofeos.join(' ');
+            }
+
+            // Verificar fin de carrera
+            if (estado.edad >= 40) {
+                terminarCarrera();
+                return;
+            }
+
+            // Generar nueva decisión para el próximo año
+            setTimeout(generarDecision, 200);
+        }
+
+        // ================================================================
+        //  TERMINAR CARRERA
+        // ================================================================
+        function terminarCarrera() {
+            estado.carreraActiva = false;
+            mensajeSimulacion.textContent = `🏁 ¡CARRERA FINALIZADA! ${estado.apellido} se retira a los ${estado.edad} años. 
+            OVR final: ${estado.ovr}, Goles: ${estado.goles}, Asistencias: ${estado.asistencias}, Trofeos: ${estado.trofeos.length}.`;
+            mensajeSimulacion.style.color = '#ffb74d';
+            decisionTexto.innerHTML = '🏁 <strong>Carrera finalizada.</strong> Reiniciá para comenzar de nuevo.';
+            decisionOpciones.innerHTML =
+                `<button class="btn-dec aceptar" onclick="reiniciarCompleto()">🔄 Reiniciar carrera</button>`;
+        }
+
+        // ================================================================
+        //  REINICIAR COMPLETO
+        // ================================================================
+        function reiniciarCompleto() {
+            estado.carreraActiva = false;
+            estado.edad = 16;
+            estado.ovr = 50;
+            estado.goles = 0;
+            estado.asistencias = 0;
+            estado.partidos = 0;
+            estado.trofeos = [];
+            estado.clubActual = null;
+            estado.historial = [];
+            estado.añoActual = 0;
+            actualizarCard();
+            renderTimeline();
+            actualizarTrofeos();
+            panelCarrera.classList.remove('active');
+            panelOfertas.classList.add('active');
+            renderOfertas();
+            preNumero.textContent = estado.numero;
+            mensajeSimulacion.textContent = '🔄 Carrera reiniciada. Elegí un club.';
+            mensajeSimulacion.style.color = '#4fc3f7';
+        }
+
+        document.getElementById('btnReiniciarCarrera').addEventListener('click', () => {
+            if (confirm('¿Reiniciar toda la carrera?')) {
+                reiniciarCompleto();
+            }
+        });
+
+        // ================================================================
+        //  BOTÓN SIMULAR AÑO (acción manual)
+        // ================================================================
+        document.getElementById('btnSimularAño').addEventListener('click', () => {
+            if (!estado.carreraActiva) {
+                mensajeSimulacion.textContent = '⚠️ Primero fichá por un club.';
+                mensajeSimulacion.style.color = '#ff8a80';
+                return;
+            }
+            if (estado.edad >= 40) {
+                mensajeSimulacion.textContent = '🏁 Carrera finalizada. Reiniciá para comenzar de nuevo.';
+                mensajeSimulacion.style.color = '#ffb74d';
+                return;
+            }
+            // Si no hay decisión tomada, forzar una aleatoria
+            const botones = decisionOpciones.querySelectorAll('.btn-dec');
+            if (botones.length > 0) {
+                const randomBtn = botones[Math.floor(Math.random() * botones.length)];
+                randomBtn.click();
+            } else {
+                // Si no hay botones, simular año directamente
+                simularAño('⏩ Simulación automática.');
+            }
+        });
+
+        // ================================================================
+        //  BOTÓN ATRÁS EN OFERTAS
+        // ================================================================
+        document.getElementById('btnOfertasAtras').addEventListener('click', () => {
+            panelOfertas.classList.remove('active');
+            panelIdentidad.classList.add('active');
+        });
+
+        // ================================================================
+        //  INICIO
+        // ================================================================
+        console.log('⚽ Simulador de carrera con SUERTE y decisiones en pantalla');
+        console.log('🎯 Completá tus datos, elegí un club y comenzá tu leyenda.');
+    </script>
+</body>
+</html>

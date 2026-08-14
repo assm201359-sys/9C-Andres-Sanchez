@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menú - El Mundo de Lionel Messi</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#010E26;
+    color:#FFFFFF;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.contenedor{
+    width:500px;
+    border:2px solid #39FF14;
+    border-radius:15px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 0 20px #39FF14;
+}
+
+h1{
+    color:#39FF14;
+    font-size:38px;
+    margin-bottom:15px;
+}
+
+h2{
+    margin-bottom:30px;
+}
+
+.botones{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    background:#39FF14;
+    color:#010E26;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 20px #39FF14;
+}
+
+a{
+    text-decoration:none;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+<h1>El Mundo de Lionel Messi</h1>
+
+<h2 id="saludo"></h2>
+
+<div class="botones">
+
+<a href="index.html">
+<button>🏠 Inicio</button>
+</a>
+
+<a href="juego.html">
+<button>⚽ Juego de Penales</button>
+</a>
+
+<a href="diario.html">
+<button>📖 Diario Personal</button>
+</a>
+
+<a href="tareas.html">
+<button>✅ Lista de Tareas</button>
+</a>
+
+<a href="notas.html">
+<button>🧮 Calculadora de Notas</button>
+</a>
+
+</div>
+
+</div>
+
+<script>
+const nombre = localStorage.getItem("usuario");
+
+if(nombre){
+    document.getElementById("saludo").textContent =
+    "¡Bienvenido, " + nombre + "!";
+}else{
+    document.getElementById("saludo").textContent =
+    "¡Bienvenido!";
+}
+</script>
+
+</body>
+</html>

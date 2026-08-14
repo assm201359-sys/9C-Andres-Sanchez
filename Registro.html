@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro - El Mundo de Lionel Messi</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#010E26;
+    color:#FFFFFF;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.contenedor{
+    width:400px;
+    border:2px solid #39FF14;
+    border-radius:15px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 0 20px #39FF14;
+}
+
+h1{
+    color:#39FF14;
+    margin-bottom:25px;
+    font-size:35px;
+}
+
+label{
+    display:block;
+    text-align:left;
+    margin-top:15px;
+    margin-bottom:8px;
+    font-size:18px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+}
+
+button{
+    margin-top:25px;
+    width:100%;
+    padding:12px;
+    background:#39FF14;
+    color:#010E26;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 20px #39FF14;
+}
+
+a{
+    text-decoration:none;
+}
+
+.volver{
+    display:block;
+    margin-top:20px;
+    color:#FFFFFF;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+<h1>Registro</h1>
+
+<form id="formRegistro">
+
+<label>Nombre de Usuario</label>
+<input
+type="text"
+id="nombre"
+placeholder="Escribe tu nombre"
+required>
+
+<label>Contraseña</label>
+<input
+type="password"
+id="password"
+placeholder="Escribe tu contraseña"
+required>
+
+<button type="submit">
+Registrarse
+</button>
+
+</form>
+
+<a href="index.html" class="volver">
+← Volver al Inicio
+</a>
+
+</div>
+
+<script>
+
+const formulario=document.getElementById("formRegistro");
+
+formulario.addEventListener("submit",function(e){
+
+e.preventDefault();
+
+const nombre=document.getElementById("nombre").value;
+const password=document.getElementById("password").value;
+
+localStorage.setItem("usuario",nombre);
+localStorage.setItem("password",password);
+
+alert("¡Registro exitoso! Bienvenido "+nombre);
+
+window.location.href="menu.html";
+
+});
+
+</script>
+
+</body>
+</html>

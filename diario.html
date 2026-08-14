@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diario Personal</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#010E26;
+    color:#FFFFFF;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
+
+.contenedor{
+    width:800px;
+    border:2px solid #39FF14;
+    border-radius:15px;
+    padding:30px;
+    box-shadow:0 0 20px #39FF14;
+}
+
+h1{
+    color:#39FF14;
+    text-align:center;
+    margin-bottom:25px;
+}
+
+label{
+    display:block;
+    margin-top:15px;
+    margin-bottom:8px;
+    font-size:18px;
+}
+
+input, textarea{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+}
+
+textarea{
+    resize:none;
+    height:150px;
+}
+
+button{
+    margin-top:20px;
+    padding:12px 20px;
+    border:none;
+    border-radius:10px;
+    background:#39FF14;
+    color:#010E26;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 15px #39FF14;
+}
+
+.entrada{
+    margin-top:30px;
+    border:2px solid #39FF14;
+    border-radius:10px;
+    padding:20px;
+}
+
+a{
+    text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+<h1>📖 Diario Personal</h1>
+
+<label>Título</label>
+<input type="text" id="titulo">
+
+<label>Fecha</label>
+<input type="date" id="fecha">
+
+<label>Escribe tu entrada</label>
+<textarea id="texto"></textarea>
+
+<button onclick="guardar()">
+Guardar Entrada
+</button>
+
+<div id="contenido"></div>
+
+<br>
+
+<a href="menu.html">
+<button>Volver al Menú</button>
+</a>
+
+</div>
+
+<script>
+
+const contenido = document.getElementById("contenido");
+
+function mostrar(){
+
+    const diario = JSON.parse(localStorage.getItem("diario"));
+
+    if(diario){
+
+        contenido.innerHTML = `
+        <div class="entrada">
+            <h2>${diario.titulo}</h2>
+            <p><b>Fecha:</b> ${diario.fecha}</p>
+            <br>
+            <p>${diario.texto}</p>
+            <button onclick="eliminar()">
+            Eliminar Entrada
+            </button>
+        </div>
+        `;
+
+    }else{
+
+        contenido.innerHTML="";
+
+    }
+
+}
+
+function guardar(){
+
+    const titulo=document.getElementById("titulo").value;
+    const fecha=document.getElementById("fecha").value;
+    const texto=document.getElementById("texto").value;
+
+    if(titulo=="" || fecha=="" || texto==""){
+
+        alert("Complete todos los campos.");
+
+        return;
+
+    }
+
+    const diario={
+
+        titulo:titulo,
+        fecha:fecha,
+        texto:texto
+
+    };
+
+    localStorage.setItem("diario",JSON.stringify(diario));
+
+    mostrar();
+
+    document.getElementById("titulo").value="";
+    document.getElementById("fecha").value="";
+    document.getElementById("texto").value="";
+
+}
+
+function eliminar(){
+
+    localStorage.removeItem("diario");
+
+    mostrar();
+
+}
+
+mostrar();
+
+</script>
+
+</body>
+</html>

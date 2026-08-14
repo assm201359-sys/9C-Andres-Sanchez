@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Tareas - El Mundo de Lionel Messi</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#010E26;
+    color:#FFFFFF;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
+
+.contenedor{
+    width:700px;
+    border:2px solid #39FF14;
+    border-radius:15px;
+    padding:30px;
+    box-shadow:0 0 20px #39FF14;
+}
+
+h1{
+    color:#39FF14;
+    text-align:center;
+    margin-bottom:25px;
+    font-size:36px;
+}
+
+.input-area{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+input{
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+}
+
+button{
+    padding:12px 18px;
+    border:none;
+    border-radius:10px;
+    background:#39FF14;
+    color:#010E26;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 15px #39FF14;
+}
+
+ul{
+    list-style:none;
+    margin-top:20px;
+}
+
+li{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border:1px solid #39FF14;
+    border-radius:8px;
+    padding:10px;
+    margin-bottom:10px;
+}
+
+.realizada{
+    text-decoration:line-through;
+    color:#AAAAAA;
+}
+
+.acciones button{
+    margin-left:8px;
+}
+
+.volver{
+    margin-top:25px;
+    text-align:center;
+}
+
+a{
+    text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+<h1>✅ Lista de Tareas</h1>
+
+<div class="input-area">
+    <input type="text" id="tarea" placeholder="Escribe una tarea...">
+    <button onclick="agregarTarea()">Agregar</button>
+</div>
+
+<ul id="lista"></ul>
+
+<div class="volver">
+    <a href="menu.html">
+        <button>Volver al Menú</button>
+    </a>
+</div>
+
+</div>
+
+<script>
+
+let tareas = JSON.parse(localStorage.getItem("tareas")) || [];
+
+function guardarTareas(){
+    localStorage.setItem("tareas", JSON.stringify(tareas));
+}
+
+function mostrarTareas(){
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    tareas.forEach((tarea, indice)=>{
+
+        lista.innerHTML += `
+        <li>
+            <span class="${tarea.hecha ? 'realizada' : ''}">
+                ${tarea.texto}
+            </span>
+
+            <div class="acciones">
+
+                <button onclick="cambiarEstado(${indice})">
+                    ${tarea.hecha ? 'Desmarcar' : 'Hecha'}
+                </button>
+
+                <button onclick="eliminarTarea(${indice})">
+                    Eliminar
+                </button>
+
+            </div>
+        </li>
+        `;
+
+    });
+
+}
+
+function agregarTarea(){
+
+    const input = document.getElementById("tarea");
+
+    if(input.value.trim() === ""){
+        alert("Escribe una tarea.");
+        return;
+    }
+
+    tareas.push({
+        texto: input.value,
+        hecha: false
+    });
+
+    guardarTareas();
+    mostrarTareas();
+
+    input.value = "";
+
+}
+
+function cambiarEstado(indice){
+
+    tareas[indice].hecha = !tareas[indice].hecha;
+
+    guardarTareas();
+    mostrarTareas();
+
+}
+
+function eliminarTarea(indice){
+
+    tareas.splice(indice,1);
+
+    guardarTareas();
+    mostrarTareas();
+
+}
+
+mostrarTareas();
+
+</script>
+
+</body>
+</html>
